@@ -2,49 +2,59 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
 
-st.set_page_config(page_title='YATZIV Decision', page_icon='Y', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title="YATZIV Decision", page_icon="◈", layout="wide", initial_sidebar_state="expanded")
 
-# ---------- DESIGN ----------
-st.markdown('''
+# -------------------- THEME --------------------
+st.markdown(r'''
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
-html, body, [class*="css"] {font-family:'Heebo',sans-serif; direction:rtl;}
-.stApp {background:linear-gradient(135deg,#f7f9ff 0%,#eef4ff 55%,#f8f6ff 100%); color:#17213b;}
-.block-container{padding-top:1.1rem;padding-bottom:3rem;max-width:1500px;}
-[data-testid="stSidebar"]{background:linear-gradient(180deg,#0b1733 0%,#101d3d 100%);}
-[data-testid="stSidebar"] *{color:#eef4ff;}
-.hero{background:linear-gradient(120deg,#111f46,#253b82 55%,#6d3df5);padding:24px 28px;border-radius:24px;color:white;box-shadow:0 18px 50px rgba(31,52,115,.18);margin-bottom:16px;}
-.hero h1{margin:0;font-size:2.05rem;font-weight:800}.hero p{margin:.35rem 0 0;color:#dbe6ff}
-.card{background:rgba(255,255,255,.94);border:1px solid #e4eafd;border-radius:20px;padding:18px 20px;box-shadow:0 8px 26px rgba(42,65,130,.07);height:100%;}
-.kpi{background:white;border:1px solid #e6ebfb;border-radius:20px;padding:17px 18px;box-shadow:0 8px 25px rgba(34,55,120,.07);min-height:120px;}
-.kpi-label{font-size:.9rem;color:#69738d;font-weight:600}.kpi-value{font-size:1.75rem;font-weight:800;color:#18244a;margin-top:6px}.kpi-sub{font-size:.82rem;color:#8790a8;margin-top:4px}.kpi.bad{background:linear-gradient(135deg,#fff,#fff0f3);border-color:#ffd7df}.kpi.good{background:linear-gradient(135deg,#fff,#ecfff6);border-color:#d2f7e5}.kpi.info{background:linear-gradient(135deg,#fff,#edf4ff);border-color:#dce8ff}
-.section-title{font-size:1.25rem;font-weight:800;color:#17244b;margin:.4rem 0 .8rem}.eyebrow{font-size:.78rem;font-weight:700;color:#6d4aff;letter-spacing:.02em}.insight{background:#f6f8ff;border-right:4px solid #6d4aff;border-radius:14px;padding:12px 14px;margin:8px 0}.danger{background:#fff2f4;border-right-color:#f43f5e}.success{background:#edfff6;border-right-color:#10b981}.warning{background:#fff8e8;border-right-color:#f59e0b}
-[data-testid="stMetric"]{background:white;border:1px solid #e6ebfb;padding:14px;border-radius:16px;box-shadow:0 5px 18px rgba(34,55,120,.05)}
-.stTabs [data-baseweb="tab-list"]{gap:8px;background:white;padding:8px;border-radius:16px;border:1px solid #e7ebf7;}
-.stTabs [data-baseweb="tab"]{height:44px;border-radius:11px;padding:0 18px;font-weight:700}.stTabs [aria-selected="true"]{background:#5b3df5;color:white;}
-div[data-testid="stDataFrame"]{border:1px solid #e6ebfb;border-radius:16px;overflow:hidden}
-.stButton>button,.stDownloadButton>button{border-radius:12px;font-weight:700;min-height:42px}
-hr{border-color:#e8ecf7}.muted{color:#7d879f;font-size:.88rem}.pill{display:inline-block;padding:5px 10px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:.78rem;font-weight:700;margin-left:5px}
-</style>''', unsafe_allow_html=True)
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
+:root{--ink:#0d1633;--muted:#6d7893;--line:#e7ebf5;--blue:#3974ff;--violet:#7454ff;--green:#17b77e;--red:#f14f6a;--amber:#f2a33a;}
+html,body,[class*="css"]{font-family:'Heebo',sans-serif;direction:rtl}.stApp{background:#f5f7fc;color:var(--ink)}
+.block-container{max-width:1480px;padding-top:1.1rem;padding-bottom:4rem}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#091229,#0c1734 65%,#101a3a);border-left:1px solid #1d2a4d}
+[data-testid="stSidebar"] *{color:#eef3ff}.stRadio>div{gap:.3rem}
+[data-testid="stSidebar"] [role="radiogroup"] label{padding:.65rem .75rem;border-radius:12px}
+[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#162650}
+.brand{font-size:1.55rem;font-weight:900;letter-spacing:.08em}.brand-sub{font-size:.78rem;color:#9fb0d8;margin-top:-5px}
+.topbar{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 18px;margin-bottom:14px;box-shadow:0 6px 22px rgba(25,44,91,.05)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(125deg,#0d1c45 0%,#183777 55%,#6d4bf5 100%);border-radius:24px;padding:25px 28px;color:#fff;box-shadow:0 18px 45px rgba(30,48,110,.18);margin-bottom:15px}
+.hero:after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.08);left:-70px;top:-150px}.hero h1{font-size:2rem;margin:3px 0;font-weight:900}.hero p{color:#dbe5ff;margin:0}
+.level{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.12);padding:7px 11px;border-radius:999px;font-size:.8rem;font-weight:700}
+.grid-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 8px 28px rgba(25,44,91,.055);height:100%}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 17px;min-height:118px;box-shadow:0 7px 24px rgba(25,44,91,.05);position:relative;overflow:hidden}.kpi:before{content:'';position:absolute;right:0;top:0;width:5px;height:100%;background:#3974ff}.kpi.good:before{background:var(--green)}.kpi.bad:before{background:var(--red)}.kpi.warn:before{background:var(--amber)}
+.kpi-label{font-size:.84rem;color:var(--muted);font-weight:700}.kpi-value{font-size:1.7rem;font-weight:900;margin:.25rem 0;color:var(--ink)}.kpi-sub{font-size:.78rem;color:#8b94a9}
+.section{font-size:1.25rem;font-weight:900;margin:.65rem 0 .75rem}.section small{font-size:.8rem;font-weight:500;color:var(--muted);margin-right:8px}
+.quest{background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px 16px;margin-bottom:9px}.quest-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.quest-title{font-weight:800}.quest-text{font-size:.87rem;color:var(--muted);margin-top:3px}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:.74rem;font-weight:800}.badge.red{background:#fff0f3;color:#d62e50}.badge.green{background:#eafbf4;color:#07875b}.badge.amber{background:#fff6e7;color:#b86c00}.badge.blue{background:#edf3ff;color:#2459c9}
+.callout{border-radius:16px;padding:14px 16px;margin:9px 0;border:1px solid #e5e9f5;background:#fff}.callout.red{background:#fff5f6;border-color:#ffdce3}.callout.green{background:#f0fcf7;border-color:#d6f5e7}.callout.amber{background:#fff9ef;border-color:#ffe8c1}.callout.blue{background:#f2f6ff;border-color:#dce7ff}
+.progress-wrap{background:#e9edf6;border-radius:999px;height:9px;overflow:hidden}.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3974ff,#7655ff)}
+.stButton>button,.stDownloadButton>button{border-radius:13px;min-height:44px;font-weight:800;border:1px solid #dfe5f2}.stButton>button[kind="primary"]{background:linear-gradient(90deg,#3974ff,#7655ff);border:0}
+[data-testid="stMetric"]{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 5px 18px rgba(25,44,91,.04)}
+div[data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:15px;overflow:hidden}
+[data-baseweb="select"]>div,[data-baseweb="input"]>div{border-radius:12px!important}.muted{color:var(--muted);font-size:.84rem}.tiny{font-size:.75rem;color:#8c96ad}
+hr{border-color:#e7ebf5}
+</style>
+''', unsafe_allow_html=True)
 
-# ---------- HELPERS ----------
+# -------------------- HELPERS --------------------
 def money(x): return f"₪{x:,.0f}"
 def pct(x): return f"{x:.1%}"
 def safe_div(a,b): return a/b if b else 0
 
-def kpi(label,value,sub='',kind='info'):
+def kpi(label,value,sub="",kind=""):
     st.markdown(f'<div class="kpi {kind}"><div class="kpi-label">{label}</div><div class="kpi-value">{value}</div><div class="kpi-sub">{sub}</div></div>',unsafe_allow_html=True)
 
-def chart_style(fig, height=330):
-    fig.update_layout(height=height,margin=dict(l=15,r=15,t=35,b=15),paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)',font=dict(family='Heebo'),legend=dict(orientation='h',y=1.12,x=.5,xanchor='center'),hovermode='x unified')
+def plot_layout(fig,height=330):
+    fig.update_layout(height=height,margin=dict(l=10,r=10,t=25,b=10),paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)',font=dict(family='Heebo',color='#53607b'),legend=dict(orientation='h',y=1.12,x=.5,xanchor='center'),hovermode='x unified')
     fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(gridcolor='#edf0f7',zerolinecolor='#dfe5f3')
+    fig.update_yaxes(gridcolor='#edf0f6',zerolinecolor='#dce2ef')
     return fig
 
-# ---------- REAL CASE STUDY FROM THE PROVIDED 2022 P&L ----------
-DEMO = pd.DataFrame({
+def callout(title,text,kind='blue'):
+    st.markdown(f'<div class="callout {kind}"><b>{title}</b><br><span class="muted">{text}</span></div>',unsafe_allow_html=True)
+
+# -------------------- DEMO: PROVIDED 2022 P&L --------------------
+DEMO=pd.DataFrame({
     'חודש':['05/2022','06/2022','07/2022','08/2022','09/2022','10/2022','11/2022','12/2022'],
     'הכנסות':[0,30242,38210,31143,47881,35432,28890,37069],
     'הוצאות':[2622,56862,32293,56589,61991,37068,31200,50531],
@@ -54,28 +64,23 @@ DEMO = pd.DataFrame({
 })
 DEMO['רווח_הפסד']=DEMO['הכנסות']-DEMO['הוצאות']
 
-# ---------- SIDEBAR: FLOW FIRST ----------
+# -------------------- SIDEBAR / SOURCE --------------------
 with st.sidebar:
-    st.markdown('## YATZIV')
-    st.caption('Business Decision Engine')
+    st.markdown('<div class="brand">◈ YATZIV</div><div class="brand-sub">BUSINESS DECISION ENGINE</div>',unsafe_allow_html=True)
     st.divider()
-    st.markdown('### 1 · בחר מקור נתונים')
-    source=st.radio('מקור', ['דוגמת החומוסייה 2022','העלאת CSV / Excel','הזנה ידנית'],label_visibility='collapsed')
-    st.markdown('### 2 · בדוק את מצב העסק')
-    st.caption('התחל ב״תמונת מצב״. אחר כך עבור ל״מה השתנה״ ורק אז לסימולציות.')
-    st.markdown('### 3 · קבל החלטה')
-    st.caption('עובד חדש · שינוי מחיר · יעד רווח')
+    page=st.radio('ניווט',['🏠  מרכז שליטה','🔎  איפה הכסף?','🎯  מעבדת החלטות','📁  נתונים','🧠  איך זה עובד'],label_visibility='collapsed')
     st.divider()
-    st.markdown('<span class="pill">Actual</span><span class="pill">Assumption</span><span class="pill">Calculated</span>',unsafe_allow_html=True)
-    st.caption('כל מסקנה צריכה להיות מחוברת למקור נתון. אין השלמת מספרים חסרים בניחוש.')
+    st.markdown('##### מקור נתונים')
+    source=st.selectbox('מקור',['דוגמת החומוסייה 2022','העלאת CSV / Excel','הזנה ידנית'],label_visibility='collapsed')
+    st.caption('המערכת מפרידה בין נתון אמיתי, הנחת משתמש וחישוב.')
 
-# ---------- DATA INPUT ----------
+# -------------------- DATA --------------------
 if source=='דוגמת החומוסייה 2022':
-    df=DEMO.copy(); source_label='Case Study · חומוסייה 2022'; confidence='בינונית'
+    df=DEMO.copy(); source_label='חומוסייה · 2022'; confidence='בינונית'; conf_score=62
 elif source=='העלאת CSV / Excel':
-    st.markdown('<div class="hero"><h1>העלאת נתוני העסק</h1><p>העלה קובץ מסודר. קודם נבדוק איכות נתונים, ורק אחר כך נציג מסקנות.</p></div>',unsafe_allow_html=True)
-    f=st.file_uploader('CSV / Excel',type=['csv','xlsx'],help='עמודות חובה: חודש, הכנסות, הוצאות. מומלץ גם: קניות, שכר, סוציאליות.')
-    if f is None: st.info('העלה קובץ כדי להתחיל.'); st.stop()
+    f=st.file_uploader('העלה CSV / Excel',type=['csv','xlsx'])
+    if f is None:
+        st.info('העלה קובץ. עמודות חובה: חודש, הכנסות, הוצאות.'); st.stop()
     try: df=pd.read_csv(f) if f.name.lower().endswith('.csv') else pd.read_excel(f)
     except Exception as e: st.error(f'לא ניתן לקרוא את הקובץ: {e}'); st.stop()
     missing=[c for c in ['חודש','הכנסות','הוצאות'] if c not in df.columns]
@@ -83,124 +88,144 @@ elif source=='העלאת CSV / Excel':
     for c in ['קניות','שכר','סוציאליות']:
         if c not in df.columns: df[c]=0
     df['רווח_הפסד']=pd.to_numeric(df['הכנסות'],errors='coerce').fillna(0)-pd.to_numeric(df['הוצאות'],errors='coerce').fillna(0)
-    source_label=f'קובץ · {f.name}'; confidence='בינונית'
+    source_label=f.name; confidence='בינונית'; conf_score=60
 else:
-    st.markdown('<div class="hero"><h1>הזנה ידנית</h1><p>מתאים לבדיקה מהירה של חודש מייצג. לניתוח מגמה עדיף להעלות מספר חודשים.</p></div>',unsafe_allow_html=True)
+    st.markdown('### הזנה ידנית')
     a,b,c=st.columns(3)
-    rev=a.number_input('הכנסות חודשיות',0.0,value=100000.0,step=1000.0); exp=b.number_input('סה״כ הוצאות',0.0,value=85000.0,step=1000.0); purch=c.number_input('קניות / עלות ישירה',0.0,value=30000.0,step=1000.0)
-    a,b=st.columns(2); sal=a.number_input('שכר',0.0,value=25000.0,step=1000.0); soc=b.number_input('סוציאליות / נלוות',0.0,value=4000.0,step=500.0)
+    rev=a.number_input('הכנסות',0.0,value=100000.0,step=1000.0); exp=b.number_input('הוצאות',0.0,value=85000.0,step=1000.0); purch=c.number_input('קניות / עלות ישירה',0.0,value=30000.0,step=1000.0)
+    a,b=st.columns(2); sal=a.number_input('שכר',0.0,value=25000.0,step=1000.0); soc=b.number_input('סוציאליות',0.0,value=4000.0,step=500.0)
     df=pd.DataFrame({'חודש':['נוכחי'],'הכנסות':[rev],'הוצאות':[exp],'קניות':[purch],'שכר':[sal],'סוציאליות':[soc]}); df['רווח_הפסד']=df['הכנסות']-df['הוצאות']
-    source_label='הזנה ידנית'; confidence='נמוכה'
+    source_label='הזנה ידנית'; confidence='נמוכה'; conf_score=35
 
 for c in ['הכנסות','הוצאות','קניות','שכר','סוציאליות','רווח_הפסד']:
     df[c]=pd.to_numeric(df[c],errors='coerce').fillna(0)
-
 active=df[df['הכנסות']>0].copy()
-total_rev=df['הכנסות'].sum(); total_exp=df['הוצאות'].sum(); total_profit=df['רווח_הפסד'].sum(); margin=safe_div(total_profit,total_rev)
-avg_rev=active['הכנסות'].mean() if len(active) else 0; avg_profit=active['רווח_הפסד'].mean() if len(active) else 0
-purch_total=active['קניות'].sum(); labor_total=(active['שכר']+active['סוציאליות']).sum(); purch_pct=safe_div(purch_total,total_rev); labor_pct=safe_div(labor_total,total_rev)
-other=max(0,total_exp-purch_total-labor_total)
+total_rev=float(df['הכנסות'].sum()); total_exp=float(df['הוצאות'].sum()); total_profit=float(df['רווח_הפסד'].sum()); margin=safe_div(total_profit,total_rev)
+avg_rev=float(active['הכנסות'].mean()) if len(active) else 0
+purch_total=float(active['קניות'].sum()); labor_total=float((active['שכר']+active['סוציאליות']).sum()); other=max(0,total_exp-purch_total-labor_total)
+purch_pct=safe_div(purch_total,total_rev); labor_pct=safe_div(labor_total,total_rev)
 
-# ---------- HEADER ----------
-st.markdown(f'''<div class="hero"><div class="eyebrow" style="color:#c9d6ff">YATZIV DECISION</div><h1>העסק שלך, ברור במסך אחד.</h1><p>{source_label} · רמת ביטחון נתונים: {confidence} · קודם מבינים מה קרה, אחר כך מקבלים החלטה.</p></div>''',unsafe_allow_html=True)
+# -------------------- TOP --------------------
+st.markdown(f'<div class="topbar"><div><b>{source_label}</b><div class="tiny">מקור פעיל לניתוח</div></div><div><span class="badge blue">Data confidence · {conf_score}%</span></div></div>',unsafe_allow_html=True)
 
-# ---------- PRIMARY NAVIGATION ----------
-t1,t2,t3,t4,t5=st.tabs(['① תמונת מצב','② מה השתנה?','③ החלטות וסימולציות','④ נתונים ואיכות','⑤ הסבר המודל'])
+# -------------------- CONTROL CENTER --------------------
+if page.startswith('🏠'):
+    status='דורש טיפול' if total_profit<0 else 'יציב'
+    st.markdown(f'''<div class="hero"><div class="level">LEVEL 01 · BUSINESS CONTROL</div><h1>מרכז השליטה של העסק</h1><p>לא דוח חשבונאי. קודם רואים מה חשוב, אחר כך נכנסים לעומק ומקבלים החלטה.</p></div>''',unsafe_allow_html=True)
+    a,b,c,d=st.columns(4)
+    with a:kpi('מחזור',money(total_rev),'Actual · התקופה שנקלטה','good')
+    with b:kpi('הוצאות',money(total_exp),'Actual · התקופה שנקלטה','warn')
+    with c:kpi('רווח / הפסד',money(total_profit),pct(margin)+' מהמחזור','bad' if total_profit<0 else 'good')
+    with d:kpi('מצב',status,f'{len(active)} חודשים עם פעילות','bad' if total_profit<0 else 'good')
 
-with t1:
-    st.markdown('<div class="section-title">מה קורה בעסק?</div>',unsafe_allow_html=True)
-    c1,c2,c3,c4=st.columns(4)
-    with c1: kpi('סה״כ הכנסות',money(total_rev),'Actual · בתקופה שנקלטה','good')
-    with c2: kpi('סה״כ הוצאות',money(total_exp),'Actual · בתקופה שנקלטה','info')
-    with c3: kpi('רווח / הפסד',money(total_profit),f'{pct(margin)} מהמחזור','bad' if total_profit<0 else 'good')
-    with c4: kpi('מחזור חודשי ממוצע',money(avg_rev),f'{len(active)} חודשים עם הכנסות','info')
+    st.markdown('<div class="section">3 משימות עכשיו <small>לפי סדר עדיפות</small></div>',unsafe_allow_html=True)
+    q1,q2,q3=st.columns(3)
+    with q1:
+        st.markdown(f'<div class="quest"><div class="quest-head"><div class="quest-title">1 · עצור את ההפסד</div><span class="badge red">קריטי</span></div><div class="quest-text">התקופה מסתיימת ב־{money(total_profit)}. לפני צמיחה צריך להבין מה קבוע, מה משתנה ומה חד־פעמי.</div></div>',unsafe_allow_html=True)
+    with q2:
+        st.markdown(f'<div class="quest"><div class="quest-head"><div class="quest-title">2 · פרק כוח אדם</div><span class="badge amber">בדיקה</span></div><div class="quest-text">שכר + סוציאליות הם {pct(labor_pct)} מהמחזור שנקלט. חסרות שעות ותפקידים כדי לקבוע יעילות.</div></div>',unsafe_allow_html=True)
+    with q3:
+        st.markdown(f'<div class="quest"><div class="quest-head"><div class="quest-title">3 · בדוק קניות</div><span class="badge blue">ניתוח</span></div><div class="quest-text">קניות הן {pct(purch_pct)} מהמחזור. בלי מלאי פתיחה/סגירה זה עדיין לא Food Cost סופי.</div></div>',unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">הסיפור במספרים</div>',unsafe_allow_html=True)
     left,right=st.columns([1.7,1])
     with left:
+        st.markdown('<div class="section">מסלול העסק <small>הכנסות · הוצאות · תוצאה</small></div>',unsafe_allow_html=True)
         fig=go.Figure()
-        fig.add_bar(x=df['חודש'],y=df['הכנסות'],name='הכנסות',marker_color='#2f80ed')
-        fig.add_bar(x=df['חודש'],y=df['הוצאות'],name='הוצאות',marker_color='#ff5b6e')
-        fig.add_scatter(x=df['חודש'],y=df['רווח_הפסד'],name='רווח / הפסד',mode='lines+markers',line=dict(color='#6c4cf5',width=3))
-        st.plotly_chart(chart_style(fig,360),use_container_width=True,config={'displayModeBar':False})
+        fig.add_bar(x=df['חודש'],y=df['הכנסות'],name='הכנסות',marker_color='#3974ff',marker_line_width=0)
+        fig.add_bar(x=df['חודש'],y=df['הוצאות'],name='הוצאות',marker_color='#f14f6a',marker_line_width=0)
+        fig.add_scatter(x=df['חודש'],y=df['רווח_הפסד'],name='רווח/הפסד',mode='lines+markers',line=dict(color='#7454ff',width=3),marker=dict(size=7))
+        st.plotly_chart(plot_layout(fig,350),use_container_width=True,config={'displayModeBar':False})
     with right:
-        labels=['קניות','שכר + סוציאליות','יתר הוצאות']; vals=[purch_total,labor_total,other]
-        fig2=go.Figure(go.Pie(labels=labels,values=vals,hole=.62,marker=dict(colors=['#ff9f43','#4f7cff','#9b5de5'])))
-        fig2.update_layout(height=360,margin=dict(l=5,r=5,t=20,b=5),paper_bgcolor='rgba(0,0,0,0)',font=dict(family='Heebo'),showlegend=True,legend=dict(orientation='h',y=-.05))
-        st.plotly_chart(fig2,use_container_width=True,config={'displayModeBar':False})
+        st.markdown('<div class="section">לאן הכסף הולך?</div>',unsafe_allow_html=True)
+        fig=go.Figure(go.Pie(labels=['קניות','שכר + סוציאליות','יתר הוצאות'],values=[purch_total,labor_total,other],hole=.68,marker=dict(colors=['#f2a33a','#3974ff','#7454ff']),textinfo='percent'))
+        fig.update_layout(height=350,margin=dict(l=5,r=5,t=20,b=5),paper_bgcolor='rgba(0,0,0,0)',font=dict(family='Heebo'),legend=dict(orientation='h',y=-.08))
+        st.plotly_chart(fig,use_container_width=True,config={'displayModeBar':False})
 
-    st.markdown('<div class="section-title">מה דורש תשומת לב עכשיו?</div>',unsafe_allow_html=True)
-    if total_profit<0:
-        st.markdown(f'<div class="insight danger"><b>העסק הפסיד {money(abs(total_profit))} בתקופה.</b><br>לפני כל הרחבה או גיוס, צריך להבין אילו עלויות הן שוטפות ואילו היו חד־פעמיות/הקמה.</div>',unsafe_allow_html=True)
-    st.markdown(f'<div class="insight"><b>כוח אדם:</b> {pct(labor_pct)} מההכנסות שנקלטו. זה יחס ניהולי בלבד — בלי שעות עבודה ותפקידים עדיין אי אפשר לקבוע אם הוא גבוה או נמוך.</div>',unsafe_allow_html=True)
-    st.markdown(f'<div class="insight warning"><b>קניות:</b> {pct(purch_pct)} מהמחזור. בדוח רווח והפסד קניות אינן בהכרח זהות לעלות מזון שנצרך; בלי מלאי פתיחה/סגירה לא נסמן זאת כ־Food Cost סופי.</div>',unsafe_allow_html=True)
+    st.markdown('<div class="section">התקדמות להבנת העסק</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="progress-wrap"><div class="progress-fill" style="width:{conf_score}%"></div></div><div class="tiny" style="margin-top:6px">{conf_score}% · יש רווח והפסד חודשי. חסרים בנק, מלאי, לקוחות/ספקים, הלוואות ושעות עובדים.</div>',unsafe_allow_html=True)
 
-with t2:
-    st.markdown('<div class="section-title">Profit Leak · איפה התוצאה השתנתה?</div>',unsafe_allow_html=True)
-    tmp=df.copy(); tmp['קניות %']=np.where(tmp['הכנסות']>0,tmp['קניות']/tmp['הכנסות'],np.nan); tmp['כוח אדם %']=np.where(tmp['הכנסות']>0,(tmp['שכר']+tmp['סוציאליות'])/tmp['הכנסות'],np.nan); tmp['רווח %']=np.where(tmp['הכנסות']>0,tmp['רווח_הפסד']/tmp['הכנסות'],np.nan)
-    if len(active)>=2:
+# -------------------- MONEY MAP --------------------
+elif page.startswith('🔎'):
+    st.markdown('<div class="hero"><div class="level">LEVEL 02 · PROFIT LEAK</div><h1>איפה הכסף?</h1><p>מסך אחד שמתחיל מהחודש החריג ורק אחר כך יורד לסעיפי העלות.</p></div>',unsafe_allow_html=True)
+    if len(active):
         best=active.loc[active['רווח_הפסד'].idxmax()]; worst=active.loc[active['רווח_הפסד'].idxmin()]
         a,b,c=st.columns(3)
-        with a: kpi('החודש החזק',str(best['חודש']),money(best['רווח_הפסד']),'good')
-        with b: kpi('החודש החלש',str(worst['חודש']),money(worst['רווח_הפסד']),'bad')
-        with c: kpi('פער בין החזק לחלש',money(best['רווח_הפסד']-worst['רווח_הפסד']),'דורש פירוק לגורמים','info')
+        with a:kpi('החודש החזק',str(best['חודש']),money(best['רווח_הפסד']),'good')
+        with b:kpi('החודש החלש',str(worst['חודש']),money(worst['רווח_הפסד']),'bad')
+        with c:kpi('פער ביצועים',money(best['רווח_הפסד']-worst['רווח_הפסד']),'בין החודש החזק לחלש','warn')
+    tmp=df.copy(); tmp['קניות %']=np.where(tmp['הכנסות']>0,tmp['קניות']/tmp['הכנסות'],np.nan); tmp['כוח אדם %']=np.where(tmp['הכנסות']>0,(tmp['שכר']+tmp['סוציאליות'])/tmp['הכנסות'],np.nan); tmp['רווח %']=np.where(tmp['הכנסות']>0,tmp['רווח_הפסד']/tmp['הכנסות'],np.nan)
+    st.markdown('<div class="section">לוח חודשי</div>',unsafe_allow_html=True)
     st.dataframe(tmp[['חודש','הכנסות','הוצאות','קניות %','כוח אדם %','רווח_הפסד','רווח %']].style.format({'הכנסות':'₪{:,.0f}','הוצאות':'₪{:,.0f}','קניות %':'{:.1%}','כוח אדם %':'{:.1%}','רווח_הפסד':'₪{:,.0f}','רווח %':'{:.1%}'}),use_container_width=True,hide_index=True)
-    st.markdown('<div class="insight"><b>השלב הבא במנוע:</b> כאשר יהיו לנו ספקים, מלאי, שעות עובדים ובנק — המערכת תוכל לעבור מ״מה השתנה״ ל״למה זה השתנה״ ברמת גורם.</div>',unsafe_allow_html=True)
+    callout('מה המנוע יודע כרגע','הוא יודע לזהות באיזה חודש התוצאה הידרדרה ואילו קבוצות עלות השתנו. הוא עדיין לא יכול לייחס את הסיבה לספק/עובד/מוצר בלי פירוט נוסף.','blue')
+    callout('כלל בטיחות','לא נסמן קניות כעלות מזון סופית בלי תנועות מלאי, ולא נסיק ששכר גבוה/נמוך בלי שעות ותפוקה.','amber')
 
-with t3:
-    st.markdown('<div class="section-title">קודם בוחרים החלטה — ורק אז רואים את המספרים הרלוונטיים</div>',unsafe_allow_html=True)
-    decision=st.segmented_control('מה אתה רוצה לבדוק?',['עובד חדש','שינוי מחיר','יעד רווח'],default='עובד חדש')
-    if decision=='עובד חדש':
-        st.markdown('#### האם עובד חדש מכסה את עצמו?')
+# -------------------- DECISION LAB --------------------
+elif page.startswith('🎯'):
+    st.markdown('<div class="hero"><div class="level">LEVEL 03 · DECISION LAB</div><h1>מעבדת החלטות</h1><p>בחר החלטה אחת. המסך מציג רק את הנתונים שצריך עבורה — בלי עומס.</p></div>',unsafe_allow_html=True)
+    decision=st.radio('בחר משימה',['👤 עובד חדש','🏷️ שינוי מחיר','🏁 יעד רווח'],horizontal=True,label_visibility='collapsed')
+    st.divider()
+    if 'עובד' in decision:
+        st.markdown('<div class="section">האם העובד מכסה את עצמו?</div>',unsafe_allow_html=True)
         a,b=st.columns([1,1])
         with a:
             emp_type=st.selectbox('סוג העסקה',['שעתי','חודשי'])
             if emp_type=='שעתי':
                 hourly=st.number_input('שכר לשעה ₪',0.0,value=55.0,step=1.0); hours=st.number_input('שעות בחודש',0.0,value=160.0,step=5.0); base=hourly*hours
             else:
-                base=st.number_input('שכר ברוטו חודשי ₪',0.0,value=10000.0,step=500.0); hours=st.number_input('שעות בחודש',0.0,value=182.0,step=1.0)
-            productive=st.number_input('שעות יצרניות / מחויבות ללקוח',0.0,value=min(float(hours),120.0),step=5.0)
-            extra=st.number_input('ציוד / רכב / טלפון / הכשרה — חודשי ₪',0.0,value=500.0,step=100.0)
-            pension_rate=st.number_input('הפרשות מעסיק נוספות לאומדן (%)',0.0,50.0,value=12.5,step=.5)/100
+                base=st.number_input('ברוטו חודשי ₪',0.0,value=10000.0,step=500.0); hours=st.number_input('שעות בחודש',0.0,value=182.0,step=1.0)
+            productive=st.number_input('שעות יצרניות',0.0,value=min(float(hours),120.0),step=5.0)
+            extra=st.number_input('עלות חודשית נוספת ₪',0.0,value=500.0,step=100.0)
+            employer_extra=st.number_input('הפרשות/עלויות מעסיק נוספות לאומדן (%)',0.0,50.0,value=12.5,step=.5)/100
         with b:
             default_cm=int(max(5,min(95,round((1-purch_pct)*100 if total_rev else 50))))
             cm=st.slider('Contribution Margin',5,95,default_cm)/100
-            expected_rev=st.number_input('הכנסה חודשית נוספת שהעובד צפוי לייצר ₪',0.0,value=30000.0,step=1000.0)
+            expected_rev=st.number_input('הכנסה חודשית נוספת צפויה ₪',0.0,value=30000.0,step=1000.0)
+            # NI here is a user-facing estimate for scenario testing, not a legal payroll calculator.
             ni=min(base,7703)*.0451+max(0,base-7703)*.076
-            loaded=base+ni+base*pension_rate+extra; breakeven=loaded/cm if cm else np.inf; contrib=expected_rev*cm-loaded; mos=safe_div(expected_rev-breakeven,expected_rev) if expected_rev else -1
-            x,y=st.columns(2); x.metric('עלות מעסיק משוערת',money(loaded)); y.metric('הכנסה לנקודת איזון',money(breakeven))
-            x,y=st.columns(2); x.metric('תרומה חודשית',money(contrib)); y.metric('עלות לשעה יצרנית',money(loaded/productive) if productive else '—')
-            if contrib<=0: st.error(f'לפי ההנחות חסרות כ־{money(max(0,breakeven-expected_rev))} הכנסות בחודש כדי להגיע לאיזון.')
-            elif mos<.2: st.warning(f'מכסה עלות, אבל מרווח הביטחון רק {mos:.0%}.')
-            else: st.success(f'לפי ההנחות מרווח הביטחון הוא {mos:.0%}.')
-        st.caption('החישוב הוא סימולציה ניהולית. שיעורי עלות מעסיק/זכויות דורשים אימות לפי סוג העובד והתקופה.')
-    elif decision=='שינוי מחיר':
+            loaded=base+ni+base*employer_extra+extra; breakeven=loaded/cm if cm else np.inf; contribution=expected_rev*cm-loaded; mos=safe_div(expected_rev-breakeven,expected_rev) if expected_rev else -1
+            x,y=st.columns(2); x.metric('עלות משוערת',money(loaded)); y.metric('מחזור לאיזון',money(breakeven))
+            x,y=st.columns(2); x.metric('תרומה אחרי העובד',money(contribution)); y.metric('עלות לשעה יצרנית',money(loaded/productive) if productive else '—')
+            if contribution<=0: callout('לא מגיע לאיזון',f'חסרות בערך {money(max(0,breakeven-expected_rev))} הכנסות חודשיות לפי ההנחות.','red')
+            elif mos<.2: callout('עובר — אבל צפוף',f'מרווח הביטחון הוא {mos:.0%}. שינוי קטן במכירות יכול למחוק את הכדאיות.','amber')
+            else: callout('עובר את הסימולציה',f'מרווח הביטחון לפי ההנחות הוא {mos:.0%}.','green')
+        st.caption('הסימולציה אינה מחשבון שכר משפטי. יש לאמת עלויות מעסיק לפי העובד, התקופה וההסכם.')
+    elif 'מחיר' in decision:
         a,b,c=st.columns(3); price=a.number_input('מחיר נוכחי',1.0,value=100.0); varcost=b.number_input('עלות משתנה ליחידה',0.0,value=40.0); qty=c.number_input('כמות חודשית',1.0,value=1000.0)
-        newprice=st.number_input('מחיר חדש',1.0,value=110.0); oldcm=(price-varcost)*qty; newcmu=newprice-varcost; qty_same=oldcm/newcmu if newcmu>0 else np.inf; loss_allowed=1-qty_same/qty
-        a,b=st.columns(2); a.metric('ירידה מקסימלית בכמות',pct(loss_allowed)); b.metric('כמות מינימום לשמירת אותה תרומה',f'{qty_same:,.0f}')
-        st.info('זהו חישוב Contribution בלבד. הוא לא מניח מה תהיה תגובת הלקוחות למחיר החדש.')
+        newprice=st.number_input('מחיר חדש',1.0,value=110.0); old_contribution=(price-varcost)*qty; new_cmu=newprice-varcost; qty_same=old_contribution/new_cmu if new_cmu>0 else np.inf; loss_allowed=1-qty_same/qty
+        a,b=st.columns(2); a.metric('מקסימום ירידה בכמות',pct(loss_allowed)); b.metric('כמות מינימום',f'{qty_same:,.0f}')
+        callout('איך לקרוא את זה','זו נקודת איזון של תרומה בלבד. המערכת לא מניחה שהלקוחות אכן יקנו באותה כמות אחרי שינוי המחיר.','blue')
     else:
         default_fixed=max(0.0,float((active['הוצאות']-active['קניות']).mean() if len(active) else 50000))
         fixed=st.number_input('הוצאות חודשיות שאינן משתנות ישירות עם המכירות ₪',0.0,value=default_fixed,step=1000.0)
         cm2=st.slider('Contribution Margin לתרחיש',5,95,int(max(5,min(95,round((1-purch_pct)*100 if total_rev else 50)))))/100
         target=st.number_input('יעד רווח חודשי ₪',0.0,value=15000.0,step=1000.0); need=(fixed+target)/cm2 if cm2 else np.inf
-        a,b,c=st.columns(3); a.metric('מחזור נדרש',money(need)); b.metric('מחזור ממוצע כיום',money(avg_rev)); c.metric('פער למחזור הנדרש',money(need-avg_rev))
+        a,b,c=st.columns(3); a.metric('מחזור נדרש',money(need)); b.metric('ממוצע כיום',money(avg_rev)); c.metric('פער',money(need-avg_rev))
+        if need>avg_rev: callout('המשימה',f'לפי ההנחות צריך לסגור פער של {money(need-avg_rev)} במחזור החודשי הממוצע.','amber')
+        else: callout('היעד מכוסה',f'לפי ההנחות המחזור הממוצע כבר גבוה בכ־{money(avg_rev-need)} מהנדרש.','green')
 
-with t4:
-    st.markdown('<div class="section-title">הנתונים שעליהם המסקנות מבוססות</div>',unsafe_allow_html=True)
-    a,b,c=st.columns(3); a.metric('שורות נתונים',len(df)); b.metric('חודשים עם הכנסה',len(active)); c.metric('רמת ביטחון',confidence)
+# -------------------- DATA --------------------
+elif page.startswith('📁'):
+    st.markdown('<div class="hero"><div class="level">LEVEL 04 · DATA ROOM</div><h1>חדר הנתונים</h1><p>כאן בודקים על מה אפשר לסמוך ומה עדיין חסר.</p></div>',unsafe_allow_html=True)
+    a,b,c=st.columns(3); a.metric('רמת ביטחון',f'{conf_score}%'); b.metric('שורות',len(df)); c.metric('חודשים פעילים',len(active))
+    st.markdown(f'<div class="progress-wrap"><div class="progress-fill" style="width:{conf_score}%"></div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section">נתונים מנורמלים</div>',unsafe_allow_html=True)
     st.dataframe(df,use_container_width=True,hide_index=True)
-    st.download_button('הורד נתונים מנורמלים CSV',df.to_csv(index=False).encode('utf-8-sig'),'yatziv_normalized.csv','text/csv',use_container_width=True)
-    st.markdown('''<div class="insight warning"><b>מה עדיין חסר לניתוח מלא:</b> מאזן, בנק, מלאי, גיול לקוחות/ספקים, הלוואות ושעות עובדים. לכן V2 לא מציג תזרים, DSCR או Food Cost כאילו הם ידועים.</div>''',unsafe_allow_html=True)
+    st.download_button('הורד CSV מנורמל',df.to_csv(index=False).encode('utf-8-sig'),'yatziv_normalized.csv','text/csv',use_container_width=True)
+    st.markdown('<div class="section">מה חסר כדי לפתוח יכולות נוספות?</div>',unsafe_allow_html=True)
+    c1,c2,c3=st.columns(3)
+    with c1: callout('תזרים אמיתי','בנק + כרטיסי אשראי + הלוואות.','blue')
+    with c2: callout('עלות מזון אמיתית','מלאי פתיחה/סגירה + קניות.','blue')
+    with c3: callout('יעילות עובדים','שעות, תפקידים ותפוקה.','blue')
 
-with t5:
-    st.markdown('<div class="section-title">איך YATZIV חושב?</div>',unsafe_allow_html=True)
-    st.markdown('''
-    **1. Actual** — נתון שהגיע מדוח/קובץ.  
-    **2. Assumption** — הנחה שהמשתמש מזין לסימולציה.  
-    **3. Calculated** — תוצאה של נוסחה דטרמיניסטית.  
-    **4. Insight** — הסבר עסקי שמבוסס רק על מה שהנתונים מאפשרים להסיק.
-
-    הסדר מכוון: **מצב העסק → שינוי/חריגה → החלטה → בדיקת מקור הנתונים**. כך המשתמש לא קופץ ישר לסימולציה לפני שהבין את העסק.
-    ''')
-    st.info('בשלב הבא: Parser לדוחות + מיפוי חשבונות + Confidence לכל שדה + Root Cause אוטומטי + תרחיש שמרני/בסיס/חזק.')
+# -------------------- METHOD --------------------
+else:
+    st.markdown('<div class="hero"><div class="level">SYSTEM · TRUST LAYER</div><h1>איך YATZIV חושב?</h1><p>מספרים מחושבים במנוע דטרמיניסטי. ההסבר העסקי יושב מעליו.</p></div>',unsafe_allow_html=True)
+    a,b,c,d=st.columns(4)
+    with a:kpi('ACTUAL','נתון מקור','דוח / קובץ / בנק','good')
+    with b:kpi('ASSUMPTION','הנחת משתמש','לתרחיש בלבד','warn')
+    with c:kpi('CALCULATED','חישוב','נוסחה מוגדרת','')
+    with d:kpi('INSIGHT','הסבר','רק ממה שהנתונים תומכים','')
+    st.markdown('<div class="section">סדר העבודה</div>',unsafe_allow_html=True)
+    st.markdown('**1. להבין מצב → 2. למצוא שינוי/חריגה → 3. לבדוק סיבה → 4. להריץ החלטה → 5. לראות מה חסר בנתונים.**')
+    callout('למה זה חשוב','כך האפליקציה לא הופכת לעוד Dashboard עמוס. כל מסך עונה על שאלה אחת ומוביל לשלב הבא.','green')
+    callout('V3 הנוכחית','קריאת PDF אוטומטית עדיין לא פעילה. זה מכוון: קודם מנוע החלטות ומבנה מידע אמינים, אחר כך Parser עם אישור משתמש ו־Confidence לכל שדה.','amber')

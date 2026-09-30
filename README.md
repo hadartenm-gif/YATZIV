@@ -1,11 +1,6 @@
-# YATZIV Decision v2
+# YATZIV Decision — Premium V3
 
-Streamlit MVP with a redesigned RTL Hebrew workflow:
-1. תמונת מצב
-2. מה השתנה / Profit Leak
-3. החלטות וסימולציות
-4. נתונים ואיכות
-5. הסבר המודל
+Streamlit MVP with a clean game-like mission-control flow.
 
 ## Run
 ```bash
@@ -13,7 +8,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Streamlit Cloud
-Upload `app.py` and `requirements.txt` to the root of a GitHub repository and deploy `app.py`.
+## Deploy to Streamlit Community Cloud
+Upload `app.py` and `requirements.txt` to the repository root and set Main file path to `app.py`.
 
-The included hummus-shop case study is based on the 2022 P&L supplied for product testing. Missing accounting dimensions are intentionally not invented.
+## Data upload schema
+Required columns: `חודש`, `הכנסות`, `הוצאות`
+Recommended: `קניות`, `שכר`, `סוציאליות`
+
+The built-in hummus-shop dataset is a manually normalized case study from the supplied 2022 P&L and is intended for product testing, not statutory reporting.
